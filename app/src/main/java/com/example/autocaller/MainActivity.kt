@@ -37,6 +37,11 @@ class MainActivity : AppCompatActivity() {
     private var callCount = 0
     private val handler = Handler(Looper.getMainLooper())
     private val callDelay = 3000L // 3 seconds delay between calls
+    
+    // Add these as class variables for proper management
+    private var telephonyManager: TelephonyManager? = null
+    private var phoneStateListener: PhoneStateListener? = null
+    private var isCallInProgress = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +53,9 @@ class MainActivity : AppCompatActivity() {
         statusSection = findViewById(R.id.statusSection)
         statusText = findViewById(R.id.statusText)
         callCountText = findViewById(R.id.callCountText)
+        
+        // Initialize telephony manager
+        telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
 
         startCallButton.setOnClickListener {
             phoneNumber = phoneNumberInput.text.toString()
@@ -120,6 +128,7 @@ class MainActivity : AppCompatActivity() {
     private fun startAutoCalling() {
         shouldRepeat = true
         callCount = 0
+        isCallInProgress = false
         updateButtonStates()
         updateStatusUI()
         registerPhoneStateListener()
@@ -129,9 +138,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopAutoCalling() {
         shouldRepeat = false
+        isCallInProgress = false
         updateButtonStates()
         updateStatusUI()
         handler.removeCallbacksAndMessages(null)
+        unregisterPhoneStateListener()
         Toast.makeText(this, "Auto-calling stopped", Toast.LENGTH_SHORT).show()
     }
 
@@ -155,9 +166,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun makeCall() {
-        if (!shouldRepeat) return
+        if (!shouldRepeat || isCallInProgress) return
         
         callCount++
+        isCallInProgress = true
         updateStatusUI()
         
         val callIntent = Intent(Intent.ACTION_CALL)
@@ -171,6 +183,13 @@ class MainActivity : AppCompatActivity() {
                 startActivity(callIntent)
             } catch (e: Exception) {
                 Toast.makeText(this, "Failed to make call: ${e.message}", Toast.LENGTH_SHORT).show()
+                isCallInProgress = false
+                // Retry after delay if there was an error
+                if (shouldRepeat) {
+                    handler.postDelayed({
+                        makeCall()
+                    }, callDelay)
+                }
             }
         }
     }
@@ -181,38 +200,57 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
-
-        telephonyManager.listen(object : PhoneStateListener() {
+        // Unregister existing listener first
+        unregisterPhoneStateListener()
+        
+        // Create and store the listener
+        phoneStateListener = object : PhoneStateListener() {
             override fun onCallStateChanged(state: Int, incomingNumber: String?) {
                 super.onCallStateChanged(state, incomingNumber)
                 when (state) {
                     TelephonyManager.CALL_STATE_IDLE -> {
-                        // Call ended or not picked up
-                        if (shouldRepeat) {
-                            handler.postDelayed({
-                                makeCall() // Repeat the call after delay
-                            }, callDelay)
+                        // Call ended, not picked up, or disconnected
+                        if (isCallInProgress) {
+                            isCallInProgress = false
+                            if (shouldRepeat) {
+                                handler.postDelayed({
+                                    makeCall() // Repeat the call after delay
+                                }, callDelay)
+                            }
                         }
                     }
 
                     TelephonyManager.CALL_STATE_OFFHOOK -> {
                         // Call is active (picked up)
+                        isCallInProgress = false
                         stopAutoCalling()
                         Toast.makeText(applicationContext, "Call answered, stopping auto-dialer", Toast.LENGTH_SHORT).show()
                     }
 
                     TelephonyManager.CALL_STATE_RINGING -> {
-                        // Phone is ringing (for incoming calls, usually)
+                        // Phone is ringing (outgoing call is connecting)
+                        // Keep isCallInProgress = true until answered or ended
                     }
                 }
             }
-        }, PhoneStateListener.LISTEN_CALL_STATE)
+        }
+        
+        // Register the listener
+        telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+    }
+    
+    private fun unregisterPhoneStateListener() {
+        phoneStateListener?.let { listener ->
+            telephonyManager?.listen(listener, PhoneStateListener.LISTEN_NONE)
+            phoneStateListener = null
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
+        unregisterPhoneStateListener()
         shouldRepeat = false
+        isCallInProgress = false
     }
 }

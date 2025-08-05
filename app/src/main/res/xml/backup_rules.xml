@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Include app data in backups -->
+    <include domain="sharedpref" path="."/>
+    <include domain="database" path="."/>
+    <include domain="file" path="."/>
+    
+    <!-- Exclude sensitive or temporary data from backups -->
+    <!-- <exclude domain="file" path="temp/"/> -->
+    <!-- <exclude domain="sharedpref" path="sensitive_data.xml"/> -->
+    
+    <!-- For auto caller app, you might want to exclude call logs or sensitive phone data -->
+    <!-- <exclude domain="database" path="call_history.db"/> -->
+</full-backup-content>
