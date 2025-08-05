@@ -34,6 +34,9 @@ class AutoCallerService : Service() {
         // Extras
         const val EXTRA_PHONE_NUMBER = "PHONE_NUMBER"
         const val EXTRA_REDIAL_AFTER_DISCONNECT = "REDIAL_AFTER_DISCONNECT"
+        
+        // Maximum redial attempts before stopping automatically
+        private const val MAX_REDIAL_ATTEMPTS = 3
     }
 
     // Binder for local service binding
@@ -276,18 +279,27 @@ class AutoCallerService : Service() {
             return
         }
         
+        // Check if we've reached maximum attempts
+        if (callCount >= MAX_REDIAL_ATTEMPTS) {
+            Log.d(TAG, "Maximum redial attempts ($MAX_REDIAL_ATTEMPTS) reached, stopping")
+            callback?.onCallStatusChanged("Maximum attempts ($MAX_REDIAL_ATTEMPTS) reached - Auto-calling stopped")
+            showToast("Maximum attempts ($MAX_REDIAL_ATTEMPTS) reached. Auto-calling stopped.")
+            stopAutoCalling()
+            return
+        }
+        
         // Determine if we should redial
         val shouldRedial = when {
             !callWasAnswered && !wasCallAnswered -> {
-                Log.d(TAG, "Call never answered, will redial")
-                callback?.onCallStatusChanged("Call not answered, redialing in ${callDelay/1000} seconds...")
-                showToast("Call not answered, redialing in ${callDelay/1000} seconds...")
+                Log.d(TAG, "Call never answered, will redial (attempt ${callCount + 1}/$MAX_REDIAL_ATTEMPTS)")
+                callback?.onCallStatusChanged("Call not answered, redialing in ${callDelay/1000} seconds... (${callCount + 1}/$MAX_REDIAL_ATTEMPTS)")
+                showToast("Call not answered, redialing in ${callDelay/1000} seconds... (${callCount + 1}/$MAX_REDIAL_ATTEMPTS)")
                 true
             }
             (callWasAnswered || wasCallAnswered) && redialAfterDisconnect -> {
-                Log.d(TAG, "Call was answered but redial after disconnect is enabled")
-                callback?.onCallStatusChanged("Call disconnected, redialing in ${callDelay/1000} seconds...")
-                showToast("Call disconnected, redialing in ${callDelay/1000} seconds...")
+                Log.d(TAG, "Call was answered but redial after disconnect is enabled (attempt ${callCount + 1}/$MAX_REDIAL_ATTEMPTS)")
+                callback?.onCallStatusChanged("Call disconnected, redialing in ${callDelay/1000} seconds... (${callCount + 1}/$MAX_REDIAL_ATTEMPTS)")
+                showToast("Call disconnected, redialing in ${callDelay/1000} seconds... (${callCount + 1}/$MAX_REDIAL_ATTEMPTS)")
                 true
             }
             (callWasAnswered || wasCallAnswered) && !redialAfterDisconnect -> {
@@ -298,7 +310,7 @@ class AutoCallerService : Service() {
                 false
             }
             else -> {
-                Log.d(TAG, "Unknown state, will redial to be safe")
+                Log.d(TAG, "Unknown state, will redial to be safe (attempt ${callCount + 1}/$MAX_REDIAL_ATTEMPTS)")
                 true
             }
         }
