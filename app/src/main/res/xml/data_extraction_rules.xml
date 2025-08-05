@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- This allows auto backup of app data to Google Drive -->
+        <include domain="sharedpref" path="."/>
+        <include domain="database" path="."/>
+        <include domain="file" path="."/>
+        
+        <!-- Exclude sensitive data if any -->
+        <!-- <exclude domain="sharedpref" path="sensitive_prefs.xml"/> -->
+    </cloud-backup>
+    
+    <!-- Device transfer rules for when user switches devices -->
+    <device-transfer>
+        <include domain="sharedpref" path="."/>
+        <include domain="database" path="."/>
+        <include domain="file" path="."/>
+        
+        <!-- Exclude sensitive data during device transfer -->
+        <!-- <exclude domain="sharedpref" path="sensitive_prefs.xml"/> -->
+    </device-transfer>
+</data-extraction-rules>
