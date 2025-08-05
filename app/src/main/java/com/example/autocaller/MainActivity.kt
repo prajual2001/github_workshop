@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.switchmaterial.SwitchMaterial
 import android.os.Handler
 import android.os.Looper
 
@@ -32,16 +33,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusSection: LinearLayout
     private lateinit var statusText: TextView
     private lateinit var callCountText: TextView
+    private lateinit var redialAfterDisconnectSwitch: SwitchMaterial
     private var shouldRepeat = false
     private var phoneNumber: String = ""
     private var callCount = 0
-    private val handler = Handler(Looper.getMainLooper())
     private val callDelay = 3000L // 3 seconds delay between calls
+    private val handler = Handler(Looper.getMainLooper())
     
     // Add these as class variables for proper management
     private var telephonyManager: TelephonyManager? = null
     private var phoneStateListener: PhoneStateListener? = null
     private var isCallInProgress = false
+    private var wasCallAnswered = false // Track if call was actually answered
+    private var redialAfterDisconnect = true // Control redial behavior
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +57,7 @@ class MainActivity : AppCompatActivity() {
         statusSection = findViewById(R.id.statusSection)
         statusText = findViewById(R.id.statusText)
         callCountText = findViewById(R.id.callCountText)
+        redialAfterDisconnectSwitch = findViewById(R.id.redialAfterDisconnectSwitch)
         
         // Initialize telephony manager
         telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
@@ -68,6 +73,18 @@ class MainActivity : AppCompatActivity() {
 
         stopCallButton.setOnClickListener {
             stopAutoCalling()
+        }
+        
+        // Set up the redial switch
+        redialAfterDisconnectSwitch.isChecked = redialAfterDisconnect
+        redialAfterDisconnectSwitch.setOnCheckedChangeListener { _, isChecked ->
+            redialAfterDisconnect = isChecked
+            val message = if (isChecked) {
+                "Will redial even after call disconnection"
+            } else {
+                "Will stop after call is answered and disconnected"
+            }
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
 
         updateButtonStates()
@@ -129,6 +146,8 @@ class MainActivity : AppCompatActivity() {
         shouldRepeat = true
         callCount = 0
         isCallInProgress = false
+        wasCallAnswered = false
+        redialAfterDisconnect = redialAfterDisconnectSwitch.isChecked
         updateButtonStates()
         updateStatusUI()
         registerPhoneStateListener()
@@ -139,6 +158,7 @@ class MainActivity : AppCompatActivity() {
     private fun stopAutoCalling() {
         shouldRepeat = false
         isCallInProgress = false
+        wasCallAnswered = false
         updateButtonStates()
         updateStatusUI()
         handler.removeCallbacksAndMessages(null)
@@ -149,12 +169,18 @@ class MainActivity : AppCompatActivity() {
     private fun updateButtonStates() {
         startCallButton.isEnabled = !shouldRepeat
         stopCallButton.isEnabled = shouldRepeat
+        redialAfterDisconnectSwitch.isEnabled = !shouldRepeat
     }
 
     private fun updateStatusUI() {
         if (shouldRepeat) {
             statusSection.visibility = View.VISIBLE
-            statusText.text = "Calling $phoneNumber..."
+            val status = when {
+                isCallInProgress && wasCallAnswered -> "Call in progress with $phoneNumber..."
+                isCallInProgress -> "Calling $phoneNumber..."
+                else -> "Preparing to call $phoneNumber..."
+            }
+            statusText.text = status
             callCountText.text = callCount.toString()
         } else {
             if (callCount > 0) {
@@ -170,6 +196,7 @@ class MainActivity : AppCompatActivity() {
         
         callCount++
         isCallInProgress = true
+        wasCallAnswered = false // Reset for new call
         updateStatusUI()
         
         val callIntent = Intent(Intent.ACTION_CALL)
@@ -212,24 +239,61 @@ class MainActivity : AppCompatActivity() {
                         // Call ended, not picked up, or disconnected
                         if (isCallInProgress) {
                             isCallInProgress = false
+                            
                             if (shouldRepeat) {
-                                handler.postDelayed({
-                                    makeCall() // Repeat the call after delay
-                                }, callDelay)
+                                // Determine if we should redial based on settings and call history
+                                val shouldRedial = when {
+                                    !wasCallAnswered -> {
+                                        // Call was never answered - always redial
+                                        true
+                                    }
+                                    redialAfterDisconnect -> {
+                                        // Call was answered but user wants to redial after disconnect
+                                        Toast.makeText(applicationContext, 
+                                            "Call disconnected, redialing in ${callDelay/1000} seconds...", 
+                                            Toast.LENGTH_SHORT).show()
+                                        true
+                                    }
+                                    else -> {
+                                        // Call was answered and user doesn't want to redial after disconnect
+                                        Toast.makeText(applicationContext, 
+                                            "Call completed, auto-dialer stopped", 
+                                            Toast.LENGTH_SHORT).show()
+                                        stopAutoCalling()
+                                        false
+                                    }
+                                }
+                                
+                                if (shouldRedial) {
+                                    handler.postDelayed({
+                                        makeCall() // Repeat the call after delay
+                                    }, callDelay)
+                                }
                             }
                         }
                     }
 
                     TelephonyManager.CALL_STATE_OFFHOOK -> {
                         // Call is active (picked up)
-                        isCallInProgress = false
-                        stopAutoCalling()
-                        Toast.makeText(applicationContext, "Call answered, stopping auto-dialer", Toast.LENGTH_SHORT).show()
+                        wasCallAnswered = true
+                        updateStatusUI()
+                        
+                        // Don't stop auto-calling here anymore - let it continue based on user preference
+                        if (!redialAfterDisconnect) {
+                            Toast.makeText(applicationContext, 
+                                "Call answered! Will stop after disconnect (redial disabled)", 
+                                Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(applicationContext, 
+                                "Call answered! Will redial after disconnect", 
+                                Toast.LENGTH_SHORT).show()
+                        }
                     }
 
                     TelephonyManager.CALL_STATE_RINGING -> {
                         // Phone is ringing (outgoing call is connecting)
                         // Keep isCallInProgress = true until answered or ended
+                        updateStatusUI()
                     }
                 }
             }
@@ -252,5 +316,6 @@ class MainActivity : AppCompatActivity() {
         unregisterPhoneStateListener()
         shouldRepeat = false
         isCallInProgress = false
+        wasCallAnswered = false
     }
 }
