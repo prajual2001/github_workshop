@@ -1,37 +1,33 @@
 package com.example.autocaller
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.provider.Settings
-import android.telephony.TelephonyManager
-import android.telephony.PhoneStateListener
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.switchmaterial.SwitchMaterial
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
+import com.google.android.material.textfield.TextInputEditText
+import android.widget.LinearLayout
+import android.widget.TextView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), AutoCallerService.CallStateCallback {
 
     companion object {
-        private const val TAG = "AutoCaller"
+        private const val TAG = "MainActivity"
     }
 
     private val CALL_PERMISSION_REQUEST_CODE = 1
-    private val READ_PHONE_STATE_PERMISSION_REQUEST_CODE = 2
     private lateinit var phoneNumberInput: TextInputEditText
     private lateinit var startCallButton: MaterialButton
     private lateinit var stopCallButton: MaterialButton
@@ -39,26 +35,44 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var callCountText: TextView
     private lateinit var redialAfterDisconnectSwitch: SwitchMaterial
-    private var shouldRepeat = false
-    private var phoneNumber: String = ""
-    private var callCount = 0
-    private val callDelay = 3000L // 3 seconds delay between calls
-    private val handler = Handler(Looper.getMainLooper())
-    private val maxCallDuration = 15000L // 15 seconds max before considering call failed
     
-    // Add these as class variables for proper management
-    private var telephonyManager: TelephonyManager? = null
-    private var phoneStateListener: PhoneStateListener? = null
-    private var isCallInProgress = false
-    private var wasCallAnswered = false // Track if call was actually answered
-    private var redialAfterDisconnect = true // Control redial behavior
-    private var callStartTime = 0L
-    private var fallbackTimer: Runnable? = null
+    // Service binding
+    private var autoCallerService: AutoCallerService? = null
+    private var serviceBound = false
+    
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            Log.d(TAG, "Service connected")
+            val binder = service as AutoCallerService.LocalBinder
+            autoCallerService = binder.getService()
+            autoCallerService?.setCallback(this@MainActivity)
+            serviceBound = true
+            
+            // Update UI with current service state
+            updateUIFromService()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            Log.d(TAG, "Service disconnected")
+            autoCallerService?.setCallback(null)
+            autoCallerService = null
+            serviceBound = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        initializeViews()
+        setupClickListeners()
+        updateButtonStates(false)
+        
+        // Bind to service
+        bindToService()
+    }
+
+    private fun initializeViews() {
         phoneNumberInput = findViewById(R.id.phoneNumberInput)
         startCallButton = findViewById(R.id.startCallButton)
         stopCallButton = findViewById(R.id.stopCallButton)
@@ -66,16 +80,15 @@ class MainActivity : AppCompatActivity() {
         statusText = findViewById(R.id.statusText)
         callCountText = findViewById(R.id.callCountText)
         redialAfterDisconnectSwitch = findViewById(R.id.redialAfterDisconnectSwitch)
-        
-        // Initialize telephony manager
-        telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+    }
 
+    private fun setupClickListeners() {
         startCallButton.setOnClickListener {
-            phoneNumber = phoneNumberInput.text.toString()
+            val phoneNumber = phoneNumberInput.text.toString().trim()
             if (phoneNumber.isNotEmpty()) {
-                requestPermissions()
+                requestPermissions(phoneNumber)
             } else {
-                Toast.makeText(this, "Enter a valid number", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Enter a valid phone number", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -83,10 +96,7 @@ class MainActivity : AppCompatActivity() {
             stopAutoCalling()
         }
         
-        // Set up the redial switch
-        redialAfterDisconnectSwitch.isChecked = redialAfterDisconnect
         redialAfterDisconnectSwitch.setOnCheckedChangeListener { _, isChecked ->
-            redialAfterDisconnect = isChecked
             val message = if (isChecked) {
                 "Will redial even after call disconnection"
             } else {
@@ -94,11 +104,36 @@ class MainActivity : AppCompatActivity() {
             }
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
-
-        updateButtonStates()
     }
 
-    private fun requestPermissions() {
+    private fun bindToService() {
+        Log.d(TAG, "Binding to service")
+        val intent = Intent(this, AutoCallerService::class.java)
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE)
+    }
+
+    private fun updateUIFromService() {
+        autoCallerService?.let { service ->
+            val isActive = service.isAutoCalling()
+            val callCount = service.getCallCount()
+            val status = service.getCurrentStatus()
+            
+            updateButtonStates(isActive)
+            callCountText.text = callCount.toString()
+            statusText.text = status
+            
+            if (isActive) {
+                statusSection.visibility = View.VISIBLE
+            } else if (callCount > 0) {
+                statusSection.visibility = View.VISIBLE
+                statusText.text = "Auto-calling stopped. Total attempts: $callCount"
+            } else {
+                statusSection.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun requestPermissions(phoneNumber: String) {
         val permissionsNeeded = mutableListOf<String>()
         
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
@@ -110,15 +145,25 @@ class MainActivity : AppCompatActivity() {
             != PackageManager.PERMISSION_GRANTED) {
             permissionsNeeded.add(Manifest.permission.READ_PHONE_STATE)
         }
+        
+        // Android 13+ notification permission
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
 
         if (permissionsNeeded.isNotEmpty()) {
+            // Store phone number for use after permissions are granted
+            phoneNumberInput.tag = phoneNumber
             ActivityCompat.requestPermissions(
                 this,
                 permissionsNeeded.toTypedArray(),
                 CALL_PERMISSION_REQUEST_CODE
             )
         } else {
-            startAutoCalling()
+            startAutoCalling(phoneNumber)
         }
     }
 
@@ -138,10 +183,13 @@ class MainActivity : AppCompatActivity() {
             }
             
             if (allPermissionsGranted) {
-                startAutoCalling()
+                val phoneNumber = phoneNumberInput.tag as? String ?: phoneNumberInput.text.toString().trim()
+                if (phoneNumber.isNotEmpty()) {
+                    startAutoCalling(phoneNumber)
+                }
             } else {
-                Toast.makeText(this, "Permissions denied. Please grant all permissions.", Toast.LENGTH_SHORT).show()
-                // Optionally, open settings
+                Toast.makeText(this, "Permissions denied. Please grant all permissions.", Toast.LENGTH_LONG).show()
+                // Open settings for manual permission grant
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 val uri = Uri.fromParts("package", packageName, null)
                 intent.data = uri
@@ -150,250 +198,77 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startAutoCalling() {
-        Log.d(TAG, "Starting auto calling")
-        shouldRepeat = true
-        callCount = 0
-        isCallInProgress = false
-        wasCallAnswered = false
-        redialAfterDisconnect = redialAfterDisconnectSwitch.isChecked
-        updateButtonStates()
-        updateStatusUI()
-        registerPhoneStateListener()
-        makeCall()
-        Toast.makeText(this, "Auto-calling started", Toast.LENGTH_SHORT).show()
+    private fun startAutoCalling(phoneNumber: String) {
+        Log.d(TAG, "Starting auto calling via service")
+        val intent = Intent(this, AutoCallerService::class.java).apply {
+            action = AutoCallerService.ACTION_START_CALLING
+            putExtra(AutoCallerService.EXTRA_PHONE_NUMBER, phoneNumber)
+            putExtra(AutoCallerService.EXTRA_REDIAL_AFTER_DISCONNECT, redialAfterDisconnectSwitch.isChecked)
+        }
+        
+        // Start service (will become foreground service)
+        startService(intent)
     }
 
     private fun stopAutoCalling() {
-        Log.d(TAG, "Stopping auto calling")
-        shouldRepeat = false
-        isCallInProgress = false
-        wasCallAnswered = false
-        updateButtonStates()
-        updateStatusUI()
-        handler.removeCallbacksAndMessages(null)
-        cancelFallbackTimer()
-        unregisterPhoneStateListener()
-        Toast.makeText(this, "Auto-calling stopped", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "Stopping auto calling via service")
+        val intent = Intent(this, AutoCallerService::class.java).apply {
+            action = AutoCallerService.ACTION_STOP_CALLING
+        }
+        startService(intent)
     }
 
-    private fun updateButtonStates() {
-        startCallButton.isEnabled = !shouldRepeat
-        stopCallButton.isEnabled = shouldRepeat
-        redialAfterDisconnectSwitch.isEnabled = !shouldRepeat
+    private fun updateButtonStates(isActive: Boolean) {
+        startCallButton.isEnabled = !isActive
+        stopCallButton.isEnabled = isActive
+        redialAfterDisconnectSwitch.isEnabled = !isActive
+        phoneNumberInput.isEnabled = !isActive
     }
 
-    private fun updateStatusUI() {
-        if (shouldRepeat) {
-            statusSection.visibility = View.VISIBLE
-            val status = when {
-                isCallInProgress && wasCallAnswered -> "Call in progress with $phoneNumber..."
-                isCallInProgress -> "Calling $phoneNumber..."
-                else -> "Preparing to call $phoneNumber..."
-            }
+    // AutoCallerService.CallStateCallback implementation
+    override fun onCallCountChanged(count: Int) {
+        runOnUiThread {
+            callCountText.text = count.toString()
+        }
+    }
+
+    override fun onCallStatusChanged(status: String) {
+        runOnUiThread {
             statusText.text = status
-            callCountText.text = callCount.toString()
-        } else {
-            if (callCount > 0) {
-                statusText.text = "Auto-calling stopped. Total attempts: $callCount"
-            } else {
-                statusSection.visibility = View.GONE
-            }
         }
     }
 
-    private fun makeCall() {
-        if (!shouldRepeat || isCallInProgress) {
-            Log.d(TAG, "Skipping call - shouldRepeat: $shouldRepeat, isCallInProgress: $isCallInProgress")
-            return
-        }
-        
-        Log.d(TAG, "Making call #${callCount + 1} to $phoneNumber")
-        callCount++
-        isCallInProgress = true
-        wasCallAnswered = false // Reset for new call
-        callStartTime = System.currentTimeMillis()
-        updateStatusUI()
-        
-        // Set up fallback timer in case PhoneStateListener doesn't work
-        setupFallbackTimer()
-        
-        val callIntent = Intent(Intent.ACTION_CALL)
-        callIntent.data = Uri.parse("tel:$phoneNumber")
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CALL_PHONE
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            try {
-                startActivity(callIntent)
-                Log.d(TAG, "Call intent started successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to make call", e)
-                Toast.makeText(this, "Failed to make call: ${e.message}", Toast.LENGTH_SHORT).show()
-                handleCallEnd(false)
-            }
+    override fun onAutoCallingStarted() {
+        runOnUiThread {
+            updateButtonStates(true)
+            statusSection.visibility = View.VISIBLE
+            Toast.makeText(this, "Auto-calling started", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun setupFallbackTimer() {
-        cancelFallbackTimer()
-        fallbackTimer = Runnable {
-            Log.d(TAG, "Fallback timer triggered - call may have ended without detection")
-            if (isCallInProgress) {
-                handleCallEnd(wasCallAnswered)
-            }
-        }
-        handler.postDelayed(fallbackTimer!!, maxCallDuration)
-    }
-
-    private fun cancelFallbackTimer() {
-        fallbackTimer?.let {
-            handler.removeCallbacks(it)
-            fallbackTimer = null
+    override fun onAutoCallingStopped() {
+        runOnUiThread {
+            updateButtonStates(false)
+            Toast.makeText(this, "Auto-calling stopped", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun handleCallEnd(callWasAnswered: Boolean) {
-        Log.d(TAG, "Handling call end - wasAnswered: $callWasAnswered, current answered state: $wasCallAnswered")
-        
-        if (!isCallInProgress) {
-            Log.d(TAG, "Call already ended, ignoring")
-            return
-        }
-        
-        isCallInProgress = false
-        cancelFallbackTimer()
-        
-        if (!shouldRepeat) {
-            Log.d(TAG, "Auto calling stopped, not retrying")
-            return
-        }
-        
-        // Determine if we should redial based on settings and call history
-        val shouldRedial = when {
-            !callWasAnswered && !wasCallAnswered -> {
-                // Call was never answered - always redial
-                Log.d(TAG, "Call never answered, will redial")
-                Toast.makeText(this, "Call not answered, redialing in ${callDelay/1000} seconds...", Toast.LENGTH_SHORT).show()
-                true
-            }
-            (callWasAnswered || wasCallAnswered) && redialAfterDisconnect -> {
-                // Call was answered but user wants to redial after disconnect
-                Log.d(TAG, "Call was answered but redial after disconnect is enabled")
-                Toast.makeText(this, "Call disconnected, redialing in ${callDelay/1000} seconds...", Toast.LENGTH_SHORT).show()
-                true
-            }
-            (callWasAnswered || wasCallAnswered) && !redialAfterDisconnect -> {
-                // Call was answered and user doesn't want to redial after disconnect
-                Log.d(TAG, "Call was answered and redial after disconnect is disabled, stopping")
-                Toast.makeText(this, "Call completed, auto-dialer stopped", Toast.LENGTH_SHORT).show()
-                stopAutoCalling()
-                false
-            }
-            else -> {
-                Log.d(TAG, "Unknown state, will redial to be safe")
-                true
-            }
-        }
-        
-        if (shouldRedial) {
-            Log.d(TAG, "Scheduling next call in ${callDelay}ms")
-            handler.postDelayed({
-                Log.d(TAG, "Retry timer triggered, making next call")
-                makeCall()
-            }, callDelay)
-        }
-    }
-
-    private fun registerPhoneStateListener() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
-            != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "READ_PHONE_STATE permission not granted")
-            return
-        }
-
-        Log.d(TAG, "Registering phone state listener")
-        // Unregister existing listener first
-        unregisterPhoneStateListener()
-        
-        // Create and store the listener
-        phoneStateListener = object : PhoneStateListener() {
-            override fun onCallStateChanged(state: Int, incomingNumber: String?) {
-                super.onCallStateChanged(state, incomingNumber)
-                val stateName = when (state) {
-                    TelephonyManager.CALL_STATE_IDLE -> "IDLE"
-                    TelephonyManager.CALL_STATE_OFFHOOK -> "OFFHOOK"
-                    TelephonyManager.CALL_STATE_RINGING -> "RINGING"
-                    else -> "UNKNOWN"
-                }
-                Log.d(TAG, "Call state changed to: $stateName (isCallInProgress: $isCallInProgress, wasCallAnswered: $wasCallAnswered)")
-                
-                when (state) {
-                    TelephonyManager.CALL_STATE_IDLE -> {
-                        // Call ended, not picked up, or disconnected
-                        Log.d(TAG, "CALL_STATE_IDLE detected")
-                        if (isCallInProgress) {
-                            handleCallEnd(wasCallAnswered)
-                        }
-                    }
-
-                    TelephonyManager.CALL_STATE_OFFHOOK -> {
-                        // Call is active (picked up)
-                        Log.d(TAG, "CALL_STATE_OFFHOOK detected - call answered")
-                        wasCallAnswered = true
-                        updateStatusUI()
-                        
-                        // Don't stop auto-calling here anymore - let it continue based on user preference
-                        if (!redialAfterDisconnect) {
-                            Toast.makeText(applicationContext, 
-                                "Call answered! Will stop after disconnect (redial disabled)", 
-                                Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(applicationContext, 
-                                "Call answered! Will redial after disconnect", 
-                                Toast.LENGTH_SHORT).show()
-                        }
-                    }
-
-                    TelephonyManager.CALL_STATE_RINGING -> {
-                        // Phone is ringing (outgoing call is connecting)
-                        Log.d(TAG, "CALL_STATE_RINGING detected")
-                        updateStatusUI()
-                    }
-                }
-            }
-        }
-        
-        // Register the listener
-        try {
-            telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
-            Log.d(TAG, "Phone state listener registered successfully")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to register phone state listener", e)
-        }
-    }
-    
-    private fun unregisterPhoneStateListener() {
-        phoneStateListener?.let { listener ->
-            try {
-                telephonyManager?.listen(listener, PhoneStateListener.LISTEN_NONE)
-                Log.d(TAG, "Phone state listener unregistered")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to unregister phone state listener", e)
-            }
-            phoneStateListener = null
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "Activity resumed")
+        // Update UI in case service state changed while app was in background
+        if (serviceBound) {
+            updateUIFromService()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "Activity destroyed")
-        handler.removeCallbacksAndMessages(null)
-        cancelFallbackTimer()
-        unregisterPhoneStateListener()
-        shouldRepeat = false
-        isCallInProgress = false
-        wasCallAnswered = false
+        if (serviceBound) {
+            autoCallerService?.setCallback(null)
+            unbindService(serviceConnection)
+            serviceBound = false
+        }
     }
 }
