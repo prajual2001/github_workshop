@@ -10,10 +10,15 @@ import android.telephony.TelephonyManager
 import android.telephony.PhoneStateListener
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import android.os.Handler
 import android.os.Looper
 
@@ -21,11 +26,15 @@ class MainActivity : AppCompatActivity() {
 
     private val CALL_PERMISSION_REQUEST_CODE = 1
     private val READ_PHONE_STATE_PERMISSION_REQUEST_CODE = 2
-    private lateinit var phoneNumberInput: EditText
-    private lateinit var startCallButton: Button
-    private lateinit var stopCallButton: Button
+    private lateinit var phoneNumberInput: TextInputEditText
+    private lateinit var startCallButton: MaterialButton
+    private lateinit var stopCallButton: MaterialButton
+    private lateinit var statusSection: LinearLayout
+    private lateinit var statusText: TextView
+    private lateinit var callCountText: TextView
     private var shouldRepeat = false
     private var phoneNumber: String = ""
+    private var callCount = 0
     private val handler = Handler(Looper.getMainLooper())
     private val callDelay = 3000L // 3 seconds delay between calls
 
@@ -36,6 +45,9 @@ class MainActivity : AppCompatActivity() {
         phoneNumberInput = findViewById(R.id.phoneNumberInput)
         startCallButton = findViewById(R.id.startCallButton)
         stopCallButton = findViewById(R.id.stopCallButton)
+        statusSection = findViewById(R.id.statusSection)
+        statusText = findViewById(R.id.statusText)
+        callCountText = findViewById(R.id.callCountText)
 
         startCallButton.setOnClickListener {
             phoneNumber = phoneNumberInput.text.toString()
@@ -107,7 +119,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun startAutoCalling() {
         shouldRepeat = true
+        callCount = 0
         updateButtonStates()
+        updateStatusUI()
         registerPhoneStateListener()
         makeCall()
         Toast.makeText(this, "Auto-calling started", Toast.LENGTH_SHORT).show()
@@ -116,6 +130,7 @@ class MainActivity : AppCompatActivity() {
     private fun stopAutoCalling() {
         shouldRepeat = false
         updateButtonStates()
+        updateStatusUI()
         handler.removeCallbacksAndMessages(null)
         Toast.makeText(this, "Auto-calling stopped", Toast.LENGTH_SHORT).show()
     }
@@ -125,8 +140,25 @@ class MainActivity : AppCompatActivity() {
         stopCallButton.isEnabled = shouldRepeat
     }
 
+    private fun updateStatusUI() {
+        if (shouldRepeat) {
+            statusSection.visibility = View.VISIBLE
+            statusText.text = "Calling $phoneNumber..."
+            callCountText.text = callCount.toString()
+        } else {
+            if (callCount > 0) {
+                statusText.text = "Auto-calling stopped. Total attempts: $callCount"
+            } else {
+                statusSection.visibility = View.GONE
+            }
+        }
+    }
+
     private fun makeCall() {
         if (!shouldRepeat) return
+        
+        callCount++
+        updateStatusUI()
         
         val callIntent = Intent(Intent.ACTION_CALL)
         callIntent.data = Uri.parse("tel:$phoneNumber")
