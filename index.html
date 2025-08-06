@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riya & Prajwal - Wedding Invitation</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Playfair+Display:wght@300;400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Hero Section -->
+    <section id="hero" class="hero-section">
+        <div class="hero-background">
+            <!-- Placeholder for couple's image -->
+            <div class="background-image"></div>
+            <div class="background-overlay"></div>
+        </div>
+        
+        <div class="hero-content">
+            <div class="wedding-date-bg">08.11.2025</div>
+            <h1 class="couple-names">Riya & Prajwal</h1>
+            <div class="scroll-indicator">
+                <div class="scroll-arrow"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Love Story Section -->
+    <section id="love-story" class="love-story-section">
+        <div class="container">
+            <h2 class="section-title">Our Love Story</h2>
+            <p class="love-story-text">
+                School sweethearts bonded by Instagram, overcoming long distance from Haryana to UP — 
+                finally coming together in a two-state wedding filled with chemistry and memories.
+            </p>
+        </div>
+    </section>
+
+    <!-- Invitation Message Section -->
+    <section id="invitation" class="invitation-section">
+        <div class="container">
+            <div class="invitation-content">
+                <p class="invitation-text">
+                    Dear Family and Friends, you are all cordially invited to our destination wedding 
+                    in Rishikesh to celebrate and witness our journey.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Event Itinerary Section -->
+    <section id="itinerary" class="itinerary-section">
+        <div class="container">
+            <div class="itinerary-hero-image">
+                <!-- Placeholder for Rishikesh riverside wedding image -->
+                <div class="itinerary-bg-image"></div>
+            </div>
+            
+            <div class="itinerary-content">
+                <h2 class="section-title">Event Itinerary</h2>
+                
+                <div class="carousel-container">
+                    <div class="carousel-wrapper">
+                        <div class="carousel-track" id="carouselTrack">
+                            <!-- Day 1 -->
+                            <div class="event-card">
+                                <div class="event-image day1-image"></div>
+                                <div class="event-details">
+                                    <h3 class="event-day">Day 1</h3>
+                                    <p class="event-date">07 Nov 2025</p>
+                                    <ul class="event-list">
+                                        <li>Morning Arrival</li>
+                                        <li>Haldi Ceremony</li>
+                                        <li>Evening Mehendi</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Day 2 -->
+                            <div class="event-card">
+                                <div class="event-image day2-image"></div>
+                                <div class="event-details">
+                                    <h3 class="event-day">Day 2</h3>
+                                    <p class="event-date">08 Nov 2025</p>
+                                    <ul class="event-list">
+                                        <li>Tilak Ceremony</li>
+                                        <li>Varmala</li>
+                                        <li>Wedding Ceremony</li>
+                                        <li>Night Party</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Day 3 -->
+                            <div class="event-card">
+                                <div class="event-image day3-image"></div>
+                                <div class="event-details">
+                                    <h3 class="event-day">Day 3</h3>
+                                    <p class="event-date">09 Nov 2025</p>
+                                    <ul class="event-list">
+                                        <li>Breakfast</li>
+                                        <li>Checkout</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Carousel Navigation -->
+                    <button class="carousel-btn prev-btn" id="prevBtn">&lt;</button>
+                    <button class="carousel-btn next-btn" id="nextBtn">&gt;</button>
+                    
+                    <!-- Carousel Indicators -->
+                    <div class="carousel-indicators">
+                        <span class="indicator active" data-slide="0"></span>
+                        <span class="indicator" data-slide="1"></span>
+                        <span class="indicator" data-slide="2"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Location Section -->
+    <section id="location" class="location-section">
+        <div class="container">
+            <h2 class="section-title">Location</h2>
+            
+            <div class="map-container">
+                <!-- Google Maps Embed - Replace with actual coordinates -->
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3462.5087!2d78.2676!3d30.0869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39093e67cf93f111%3A0x1583676dde2e5e8d!2sRishikesh%2C%20Uttarakhand!5e0!3m2!1sen!2sin!4v1600000000000!5m2!1sen!2sin"
+                    width="100%" 
+                    height="400" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+            
+            <div class="location-info">
+                <p class="location-text">
+                    <strong>How to Reach:</strong><br>
+                    Nearest railway station: Rishikesh | Nearest airport: Dehradun Jolly Grant | 
+                    Cabs available from station to venue
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- RSVP Section -->
+    <section id="rsvp" class="rsvp-section">
+        <div class="container">
+            <h2 class="section-title">RSVP</h2>
+            <p class="rsvp-message">Please fill the guest form below to help us prepare better</p>
+            
+            <form class="rsvp-form" action="https://formspree.io/f/your-form-id" method="POST">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attending">Will you be attending?</label>
+                    <select id="attending" name="attending" required>
+                        <option value="">Please select</option>
+                        <option value="yes">Yes, I'll be there!</option>
+                        <option value="no">Sorry, can't make it</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message (Optional)</label>
+                    <textarea id="message" name="message" rows="4" placeholder="Share your wishes or any special requirements..."></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Send RSVP</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Riya & Prajwal. Made with love for our special day.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

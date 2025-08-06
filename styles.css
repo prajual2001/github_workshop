@@ -1,0 +1,592 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    line-height: 1.6;
+    color: #4a4a4a;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Color Variables */
+:root {
+    --primary-pink: #f8c8d4;
+    --secondary-pink: #f4a4b6;
+    --ivory: #faf7f2;
+    --soft-gold: #e8d5b7;
+    --dark-text: #4a4a4a;
+    --light-text: #8a8a8a;
+    --white: #ffffff;
+    --overlay: rgba(0, 0, 0, 0.3);
+}
+
+/* Typography */
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 600;
+    color: var(--dark-text);
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-pink), var(--soft-gold));
+}
+
+/* Hero Section */
+.hero-section {
+    height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.background-image {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary-pink) 0%, var(--soft-gold) 100%);
+    /* Placeholder gradient - replace with actual image */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--overlay);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: var(--white);
+}
+
+.wedding-date-bg {
+    position: absolute;
+    top: -150px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.1em;
+    z-index: 1;
+    user-select: none;
+}
+
+.couple-names {
+    font-family: 'Dancing Script', cursive;
+    font-size: 5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    animation: fadeInUp 1.5s ease-out;
+}
+
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: bounce 2s infinite;
+}
+
+.scroll-arrow {
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--white);
+    border-radius: 50%;
+    position: relative;
+}
+
+.scroll-arrow::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid var(--white);
+    border-bottom: 2px solid var(--white);
+    transform: rotate(45deg);
+}
+
+/* Love Story Section */
+.love-story-section {
+    padding: 100px 0;
+    background: var(--ivory);
+    position: relative;
+}
+
+.love-story-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    line-height: 1.8;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    color: var(--dark-text);
+    font-style: italic;
+}
+
+/* Invitation Section */
+.invitation-section {
+    padding: 100px 0;
+    background: linear-gradient(135deg, var(--primary-pink) 0%, var(--secondary-pink) 100%);
+    color: var(--white);
+}
+
+.invitation-content {
+    text-align: center;
+}
+
+.invitation-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    line-height: 1.8;
+    max-width: 900px;
+    margin: 0 auto;
+    font-weight: 400;
+}
+
+/* Itinerary Section */
+.itinerary-section {
+    padding: 100px 0;
+    background: var(--ivory);
+}
+
+.itinerary-hero-image {
+    margin-bottom: 60px;
+    height: 300px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.itinerary-bg-image {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, var(--soft-gold), var(--primary-pink));
+    /* Placeholder - replace with Rishikesh image */
+}
+
+.carousel-container {
+    position: relative;
+    margin-top: 60px;
+}
+
+.carousel-wrapper {
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.event-card {
+    min-width: 100%;
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.event-image {
+    height: 200px;
+    background: linear-gradient(45deg, var(--primary-pink), var(--soft-gold));
+    /* Placeholder - replace with actual event images */
+}
+
+.day1-image {
+    background: linear-gradient(45deg, #ffd89b, #19547b);
+}
+
+.day2-image {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+}
+
+.day3-image {
+    background: linear-gradient(45deg, #f093fb, #f5576c);
+}
+
+.event-details {
+    padding: 30px;
+    text-align: center;
+}
+
+.event-day {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--dark-text);
+    margin-bottom: 10px;
+}
+
+.event-date {
+    font-size: 1.1rem;
+    color: var(--light-text);
+    margin-bottom: 20px;
+}
+
+.event-list {
+    list-style: none;
+}
+
+.event-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+}
+
+.event-list li:last-child {
+    border-bottom: none;
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--white);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    color: var(--dark-text);
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.carousel-btn:hover {
+    background: var(--primary-pink);
+    color: var(--white);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.prev-btn {
+    left: -25px;
+}
+
+.next-btn {
+    right: -25px;
+}
+
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 10px;
+}
+
+.indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.indicator.active {
+    background: var(--primary-pink);
+}
+
+/* Location Section */
+.location-section {
+    padding: 100px 0;
+    background: var(--white);
+}
+
+.map-container {
+    margin: 40px 0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.location-info {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.location-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--dark-text);
+    background: var(--ivory);
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* RSVP Section */
+.rsvp-section {
+    padding: 100px 0;
+    background: linear-gradient(135deg, var(--ivory) 0%, var(--soft-gold) 100%);
+}
+
+.rsvp-message {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 50px;
+    color: var(--dark-text);
+}
+
+.rsvp-form {
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--white);
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 30px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dark-text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-pink);
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(248, 200, 212, 0.4);
+}
+
+/* Footer */
+.footer {
+    padding: 40px 0;
+    background: var(--dark-text);
+    color: var(--white);
+    text-align: center;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    40% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+    60% {
+        transform: translateX(-50%) translateY(-5px);
+    }
+}
+
+/* Scroll Animations */
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 2.5rem;
+    }
+    
+    .couple-names {
+        font-size: 3.5rem;
+    }
+    
+    .wedding-date-bg {
+        font-size: 5rem;
+        top: -100px;
+    }
+    
+    .love-story-text,
+    .invitation-text {
+        font-size: 1.2rem;
+    }
+    
+    .event-card {
+        margin: 0 10px;
+    }
+    
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .prev-btn {
+        left: -20px;
+    }
+    
+    .next-btn {
+        right: -20px;
+    }
+    
+    .rsvp-form {
+        margin: 0 20px;
+        padding: 30px;
+    }
+    
+    .container {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .couple-names {
+        font-size: 2.8rem;
+    }
+    
+    .wedding-date-bg {
+        font-size: 4rem;
+        top: -80px;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .love-story-text,
+    .invitation-text {
+        font-size: 1.1rem;
+    }
+    
+    .event-details {
+        padding: 20px;
+    }
+    
+    .carousel-btn {
+        display: none;
+    }
+    
+    .rsvp-form {
+        padding: 25px;
+    }
+}
+
+/* Parallax Effect for Hero */
+@media (min-width: 769px) {
+    .hero-section {
+        position: relative;
+    }
+    
+    .background-image {
+        transform: translateZ(0);
+        will-change: transform;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--ivory);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-pink);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-pink);
+}
