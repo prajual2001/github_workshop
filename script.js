@@ -113,28 +113,94 @@ function initScrollAnimations() {
     initHeroScrollEffect();
 }
 
-// Hero Section Parallax and Fade Effect
+// Hero Section Enhanced Scroll Effect
 function initHeroScrollEffect() {
     const hero = document.querySelector('.hero-section');
     const heroContent = document.querySelector('.hero-content');
     const backgroundImage = document.querySelector('.background-image');
+    const weddingDateBg = document.querySelector('.wedding-date-bg');
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    const backgroundOverlay = document.querySelector('.background-overlay');
     
-    window.addEventListener('scroll', () => {
+    // Throttle scroll events for better performance
+    let ticking = false;
+    
+    function updateHeroAnimation() {
         const scrolled = window.pageYOffset;
-        const rate = scrolled * -0.5;
-        const opacity = 1 - scrolled / window.innerHeight;
+        const windowHeight = window.innerHeight;
+        const scrollProgress = Math.min(scrolled / windowHeight, 1);
         
-        // Parallax effect for background
+        // Enhanced parallax effect for background with blur
         if (backgroundImage) {
-            backgroundImage.style.transform = `translateY(${rate}px)`;
+            const parallaxRate = scrolled * -0.4;
+            const blurAmount = scrollProgress * 2;
+            backgroundImage.style.transform = `translateY(${parallaxRate}px) scale(${1 + scrollProgress * 0.1})`;
+            backgroundImage.style.filter = `blur(${blurAmount}px)`;
         }
         
-        // Fade out hero content
-        if (heroContent && scrolled < window.innerHeight) {
-            heroContent.style.opacity = opacity;
-            heroContent.style.transform = `translateY(${scrolled * 0.3}px)`;
+        // Dynamic overlay opacity
+        if (backgroundOverlay) {
+            const overlayOpacity = 0.3 + (scrollProgress * 0.4);
+            backgroundOverlay.style.background = `rgba(0, 0, 0, ${overlayOpacity})`;
         }
-    });
+        
+        // Hero content animation with multiple effects
+        if (heroContent && scrolled < windowHeight) {
+            const contentOpacity = 1 - (scrollProgress * 1.2);
+            const contentTranslateY = scrolled * 0.5;
+            const contentScale = 1 - (scrollProgress * 0.1);
+            
+            heroContent.style.opacity = Math.max(contentOpacity, 0);
+            heroContent.style.transform = `translateY(${contentTranslateY}px) scale(${contentScale})`;
+        }
+        
+        // Wedding date background animation
+        if (weddingDateBg && scrolled < windowHeight) {
+            const dateOpacity = 0.1 - (scrollProgress * 0.1);
+            const dateTranslateY = scrolled * 0.2;
+            const dateScale = 1 + (scrollProgress * 0.2);
+            
+            weddingDateBg.style.opacity = Math.max(dateOpacity, 0);
+            weddingDateBg.style.transform = `translateX(-50%) translateY(${dateTranslateY}px) scale(${dateScale})`;
+        }
+        
+        // Scroll indicator fade out
+        if (scrollIndicator) {
+            const indicatorOpacity = 1 - (scrollProgress * 2);
+            const indicatorTranslateY = scrollProgress * 30;
+            
+            scrollIndicator.style.opacity = Math.max(indicatorOpacity, 0);
+            scrollIndicator.style.transform = `translateX(-50%) translateY(${indicatorTranslateY}px)`;
+        }
+        
+        // Add/remove scrolled class for additional CSS animations
+        if (scrollProgress > 0.1) {
+            hero?.classList.add('scrolled');
+            heroContent?.classList.add('scrolled');
+            weddingDateBg?.classList.add('scrolled');
+            scrollIndicator?.classList.add('scrolled');
+        } else {
+            hero?.classList.remove('scrolled');
+            heroContent?.classList.remove('scrolled');
+            weddingDateBg?.classList.remove('scrolled');
+            scrollIndicator?.classList.remove('scrolled');
+        }
+        
+        ticking = false;
+    }
+    
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(updateHeroAnimation);
+            ticking = true;
+        }
+    }
+    
+    // Optimized scroll listener
+    window.addEventListener('scroll', requestTick, { passive: true });
+    
+    // Initial call
+    updateHeroAnimation();
 }
 
 // Parallax Effect for Other Sections

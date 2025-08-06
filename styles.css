@@ -64,6 +64,9 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    /* Enable scroll animation */
+    will-change: transform, opacity;
+    transition: transform 0.1s ease-out, opacity 0.1s ease-out;
 }
 
 .hero-background {
@@ -71,8 +74,9 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 120%; /* Slightly larger for parallax effect */
     z-index: 1;
+    will-change: transform;
 }
 
 .background-image {
@@ -83,6 +87,8 @@ body {
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+    will-change: transform;
+    transition: transform 0.1s ease-out;
 }
 
 .background-overlay {
@@ -92,6 +98,8 @@ body {
     width: 100%;
     height: 100%;
     background: var(--overlay);
+    will-change: opacity;
+    transition: opacity 0.3s ease-out;
 }
 
 .hero-content {
@@ -99,6 +107,8 @@ body {
     z-index: 3;
     text-align: center;
     color: var(--white);
+    will-change: transform, opacity;
+    transition: all 0.1s ease-out;
 }
 
 .wedding-date-bg {
@@ -113,6 +123,8 @@ body {
     letter-spacing: 0.1em;
     z-index: 1;
     user-select: none;
+    will-change: transform, opacity;
+    transition: all 0.1s ease-out;
 }
 
 .couple-names {
@@ -124,6 +136,8 @@ body {
     z-index: 2;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     animation: fadeInUp 1.5s ease-out;
+    will-change: transform, opacity;
+    transition: all 0.1s ease-out;
 }
 
 .scroll-indicator {
@@ -132,6 +146,9 @@ body {
     left: 50%;
     transform: translateX(-50%);
     animation: bounce 2s infinite;
+    will-change: transform, opacity;
+    transition: all 0.1s ease-out;
+    cursor: pointer;
 }
 
 .scroll-arrow {
@@ -481,6 +498,27 @@ body {
     transform: translateY(0);
 }
 
+/* Hero Scroll Animation States */
+.hero-section.scrolled {
+    transform: translateY(-50px);
+    opacity: 0.3;
+}
+
+.hero-content.scrolled {
+    transform: translateY(100px) scale(0.9);
+    opacity: 0;
+}
+
+.wedding-date-bg.scrolled {
+    transform: translateX(-50%) translateY(-50px) scale(1.1);
+    opacity: 0;
+}
+
+.scroll-indicator.scrolled {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .section-title {
@@ -561,15 +599,60 @@ body {
     }
 }
 
-/* Parallax Effect for Hero */
+/* Enhanced Parallax Effects */
 @media (min-width: 769px) {
     .hero-section {
         position: relative;
+        perspective: 1000px;
     }
     
     .background-image {
         transform: translateZ(0);
         will-change: transform;
+        backface-visibility: hidden;
+    }
+    
+    .hero-content {
+        transform-style: preserve-3d;
+    }
+}
+
+/* Additional Scroll Animation Effects */
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 100%);
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.hero-section.scrolled::before {
+    opacity: 1;
+}
+
+/* Smooth scrolling behavior */
+@media (prefers-reduced-motion: no-preference) {
+    .hero-section * {
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .hero-section *,
+    .background-image,
+    .hero-content,
+    .wedding-date-bg,
+    .scroll-indicator {
+        transition: none !important;
+        animation: none !important;
+        will-change: auto !important;
     }
 }
 
