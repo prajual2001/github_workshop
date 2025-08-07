@@ -58,15 +58,51 @@ body {
 
 /* Hero Section */
 .hero-section {
-    height: 100vh;
+    min-height: 100vh;
     position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    /* Enable scroll animation */
+    background: linear-gradient(135deg, 
+        #fdf2f8 0%,      /* Soft blush pink */
+        #fef7ff 25%,     /* Light lavender */
+        #fffbeb 50%,     /* Warm ivory */
+        #fdf2f8 75%,     /* Back to blush */
+        #f0f9ff 100%     /* Soft sky blue */
+    );
+    padding: 2rem 1rem;
     will-change: transform, opacity;
     transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+}
+
+/* Decorative Floral Borders */
+.floral-border-top,
+.floral-border-bottom {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    z-index: 4;
+    overflow: hidden;
+}
+
+.floral-border-top {
+    top: 0;
+}
+
+.floral-border-bottom {
+    bottom: 0;
+    transform: rotate(180deg);
+}
+
+.floral-pattern {
+    width: 100%;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'%3E%3Cpath d='M10 10c0-5 5-10 10-10s10 5 10 10-5 10-10 10-10-5-10-10zm20 0c0-3 3-6 6-6s6 3 6 6-3 6-6 6-6-3-6-6zm20 0c0-4 4-8 8-8s8 4 8 8-4 8-8 8-8-4-8-8z' fill='%23f8c8d4' opacity='0.6'/%3E%3Cpath d='M5 5c0-2 2-4 4-4s4 2 4 4-2 4-4 4-4-2-4-4zm25 0c0-1.5 1.5-3 3-3s3 1.5 3 3-1.5 3-3 3-3-1.5-3-3zm20 0c0-2.5 2.5-5 5-5s5 2.5 5 5-2.5 5-5 5-5-2.5-5-5z' fill='%23e8d5b7' opacity='0.4'/%3E%3C/svg%3E") repeat-x;
+    background-size: 200px 60px;
+    animation: floralSway 15s ease-in-out infinite;
 }
 
 .hero-background {
@@ -74,7 +110,7 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 120%; /* Slightly larger for parallax effect */
+    height: 120%;
     z-index: 1;
     will-change: transform;
 }
@@ -82,11 +118,13 @@ body {
 .background-image {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--primary-pink) 0%, var(--soft-gold) 100%);
-    /* Placeholder gradient - replace with actual image */
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(248, 200, 212, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(232, 213, 183, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.8) 0%, transparent 50%);
+    background-size: 600px 600px, 800px 800px, 400px 400px;
+    background-position: 0% 0%, 100% 100%, 50% 50%;
+    animation: backgroundFloat 20s ease-in-out infinite;
     will-change: transform;
     transition: transform 0.1s ease-out;
 }
@@ -97,29 +135,158 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--overlay);
+    background: rgba(255, 255, 255, 0.1);
     will-change: opacity;
     transition: opacity 0.3s ease-out;
 }
 
+/* Floating Hearts */
+.floating-hearts {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.heart {
+    position: absolute;
+    font-size: 2rem;
+    color: #f8c8d4;
+    opacity: 0.7;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    text-shadow: 0 0 10px rgba(248, 200, 212, 0.5);
+}
+
+.heart-1 {
+    top: 20%;
+    left: 15%;
+    animation: heartFloat1 4s infinite;
+    animation-delay: 0s;
+}
+
+.heart-2 {
+    top: 60%;
+    right: 20%;
+    animation: heartFloat2 5s infinite;
+    animation-delay: 1s;
+}
+
+.heart-3 {
+    top: 80%;
+    left: 25%;
+    animation: heartFloat3 6s infinite;
+    animation-delay: 2s;
+}
+
+.heart-4 {
+    top: 30%;
+    right: 15%;
+    animation: heartFloat1 4.5s infinite;
+    animation-delay: 3s;
+}
+
+.heart-5 {
+    top: 15%;
+    left: 70%;
+    animation: heartFloat2 5.5s infinite;
+    animation-delay: 0.5s;
+}
+
+/* Decorative Elements */
+.decorative-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.leaf,
+.flower,
+.rings {
+    position: absolute;
+    opacity: 0.6;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+.leaf {
+    font-size: 1.5rem;
+    color: #86efac;
+}
+
+.flower {
+    font-size: 1.8rem;
+    color: #fbbf24;
+}
+
+.rings {
+    font-size: 2.2rem;
+    color: #fbbf24;
+}
+
+.leaf-1 {
+    top: 25%;
+    left: 10%;
+    animation: leafSway 8s infinite;
+    animation-delay: 0s;
+}
+
+.leaf-2 {
+    bottom: 30%;
+    right: 12%;
+    animation: leafSway 7s infinite;
+    animation-delay: 2s;
+}
+
+.flower-1 {
+    top: 40%;
+    left: 8%;
+    animation: flowerBounce 6s infinite;
+    animation-delay: 1s;
+}
+
+.flower-2 {
+    bottom: 25%;
+    right: 8%;
+    animation: flowerBounce 5s infinite;
+    animation-delay: 3s;
+}
+
+.rings {
+    top: 70%;
+    left: 80%;
+    animation: ringSparkle 4s infinite;
+    animation-delay: 1.5s;
+}
+
+/* Hero Content */
 .hero-content {
     position: relative;
     z-index: 3;
     text-align: center;
-    color: var(--white);
+    color: var(--dark-text);
+    max-width: 800px;
+    margin: 0 auto;
     will-change: transform, opacity;
     transition: all 0.1s ease-out;
 }
 
 .wedding-date-bg {
     position: absolute;
-    top: -150px;
+    top: -120px;
     left: 50%;
     transform: translateX(-50%);
     font-family: 'Playfair Display', serif;
-    font-size: 8rem;
+    font-size: 6rem;
     font-weight: 300;
-    color: rgba(255, 255, 255, 0.1);
+    color: rgba(248, 200, 212, 0.15);
     letter-spacing: 0.1em;
     z-index: 1;
     user-select: none;
@@ -127,48 +294,160 @@ body {
     transition: all 0.1s ease-out;
 }
 
-.couple-names {
-    font-family: 'Dancing Script', cursive;
-    font-size: 5rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-    position: relative;
-    z-index: 2;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+/* Typography */
+.invitation-text {
+    margin-bottom: 3rem;
     animation: fadeInUp 1.5s ease-out;
-    will-change: transform, opacity;
-    transition: all 0.1s ease-out;
 }
 
-.scroll-indicator {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: bounce 2s infinite;
-    will-change: transform, opacity;
-    transition: all 0.1s ease-out;
-    cursor: pointer;
-}
-
-.scroll-arrow {
-    width: 30px;
-    height: 30px;
-    border: 2px solid var(--white);
-    border-radius: 50%;
+.main-heading {
+    font-family: 'Great Vibes', cursive;
+    font-size: 4.5rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    color: #be185d;
+    text-shadow: 2px 2px 4px rgba(190, 24, 93, 0.1);
     position: relative;
+    animation: titleSlideIn 1.8s ease-out;
 }
 
-.scroll-arrow::after {
+.main-heading::after {
     content: '';
     position: absolute;
-    top: 8px;
-    left: 8px;
-    width: 10px;
-    height: 10px;
-    border-right: 2px solid var(--white);
-    border-bottom: 2px solid var(--white);
-    transform: rotate(45deg);
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, #f8c8d4, #e8d5b7, #f8c8d4);
+    border-radius: 2px;
+}
+
+.sub-heading {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 300;
+    margin-bottom: 1rem;
+    color: #6b7280;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: subtitleFadeIn 2s ease-out 0.5s both;
+}
+
+.couple-names {
+    font-family: 'Cinzel', serif;
+    font-size: 4rem;
+    font-weight: 600;
+    margin: 2rem 0;
+    color: #92400e;
+    text-shadow: 2px 2px 4px rgba(146, 64, 14, 0.1);
+    animation: namesBounceIn 2.2s ease-out 1s both;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.name-riya,
+.name-prajwal {
+    position: relative;
+}
+
+.name-riya::before,
+.name-prajwal::after {
+    content: '✨';
+    position: absolute;
+    top: -10px;
+    font-size: 1.5rem;
+    color: #fbbf24;
+    animation: sparkle 3s ease-in-out infinite;
+}
+
+.name-riya::before {
+    left: -40px;
+}
+
+.name-prajwal::after {
+    right: -40px;
+    animation-delay: 1.5s;
+}
+
+.ampersand {
+    font-family: 'Great Vibes', cursive;
+    font-size: 3rem;
+    color: #f8c8d4;
+    margin: 0 0.5rem;
+}
+
+.wedding-date,
+.wedding-location {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    color: #6b7280;
+    animation: detailsFadeIn 2.5s ease-out 1.5s both;
+}
+
+.wedding-date {
+    font-weight: 500;
+    color: #be185d;
+}
+
+.wedding-location {
+    font-weight: 300;
+    font-style: italic;
+}
+
+/* CTA Button */
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #f8c8d4 0%, #e8d5b7 100%);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    box-shadow: 
+        0 8px 25px rgba(248, 200, 212, 0.4),
+        0 4px 15px rgba(232, 213, 183, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: buttonSlideUp 2.8s ease-out 2s both;
+}
+
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 15px 35px rgba(248, 200, 212, 0.6),
+        0 8px 25px rgba(232, 213, 183, 0.4);
+}
+
+.cta-button:hover::before {
+    left: 100%;
+}
+
+.button-decoration {
+    font-size: 1.2rem;
+    animation: buttonSparkle 2s ease-in-out infinite;
 }
 
 /* Love Story Section */
@@ -486,6 +765,161 @@ body {
     }
 }
 
+/* New Hero Animations */
+@keyframes floralSway {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+}
+
+@keyframes backgroundFloat {
+    0%, 100% {
+        background-position: 0% 0%, 100% 100%, 50% 50%;
+    }
+    33% {
+        background-position: 30% 20%, 70% 80%, 60% 40%;
+    }
+    66% {
+        background-position: 70% 10%, 30% 90%, 40% 60%;
+    }
+}
+
+@keyframes heartFloat1 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-10px) rotate(5deg); }
+    50% { transform: translateY(-5px) rotate(-3deg); }
+    75% { transform: translateY(-15px) rotate(2deg); }
+}
+
+@keyframes heartFloat2 {
+    0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+    33% { transform: translateY(-8px) rotate(-5deg) scale(1.1); }
+    66% { transform: translateY(-12px) rotate(3deg) scale(0.9); }
+}
+
+@keyframes heartFloat3 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    20% { transform: translateY(-6px) rotate(2deg); }
+    40% { transform: translateY(-10px) rotate(-4deg); }
+    60% { transform: translateY(-4px) rotate(1deg); }
+    80% { transform: translateY(-8px) rotate(-2deg); }
+}
+
+@keyframes leafSway {
+    0%, 100% { transform: rotate(0deg) translateY(0px); }
+    25% { transform: rotate(5deg) translateY(-3px); }
+    50% { transform: rotate(-3deg) translateY(-6px); }
+    75% { transform: rotate(2deg) translateY(-2px); }
+}
+
+@keyframes flowerBounce {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-8px) scale(1.1); }
+}
+
+@keyframes ringSparkle {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 0.6;
+    }
+    50% { 
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+@keyframes titleSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.8);
+    }
+    60% {
+        opacity: 0.8;
+        transform: translateY(10px) scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes subtitleFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes namesBounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(50px);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1) translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes detailsFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes buttonSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.8);
+    }
+    70% {
+        opacity: 0.9;
+        transform: translateY(-5px) scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.3) rotate(180deg);
+    }
+}
+
+@keyframes buttonSparkle {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+    }
+    25% {
+        transform: rotate(90deg) scale(1.2);
+    }
+    50% {
+        transform: rotate(180deg) scale(0.8);
+    }
+    75% {
+        transform: rotate(270deg) scale(1.1);
+    }
+}
+
 /* Scroll Animations */
 .fade-in {
     opacity: 0;
@@ -521,17 +955,78 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .section-title {
-        font-size: 2.5rem;
+    /* Hero Section Mobile */
+    .hero-section {
+        padding: 1rem 0.5rem;
+        min-height: 100vh;
     }
     
-    .couple-names {
+    .floral-border-top,
+    .floral-border-bottom {
+        height: 40px;
+    }
+    
+    .floral-pattern {
+        background-size: 150px 40px;
+    }
+    
+    .main-heading {
         font-size: 3.5rem;
     }
     
+    .sub-heading {
+        font-size: 1rem;
+    }
+    
+    .couple-names {
+        font-size: 2.8rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .name-riya::before,
+    .name-prajwal::after {
+        display: none; /* Hide sparkles on mobile for cleaner look */
+    }
+    
+    .ampersand {
+        font-size: 2rem;
+    }
+    
     .wedding-date-bg {
-        font-size: 5rem;
-        top: -100px;
+        font-size: 4rem;
+        top: -80px;
+    }
+    
+    .wedding-date,
+    .wedding-location {
+        font-size: 1rem;
+    }
+    
+    .cta-button {
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
+    }
+    
+    /* Floating elements mobile adjustments */
+    .heart {
+        font-size: 1.5rem;
+    }
+    
+    .leaf {
+        font-size: 1.2rem;
+    }
+    
+    .flower {
+        font-size: 1.4rem;
+    }
+    
+    .rings {
+        font-size: 1.8rem;
+    }
+    
+    .section-title {
+        font-size: 2.5rem;
     }
     
     .love-story-text,
@@ -568,13 +1063,39 @@ body {
 }
 
 @media (max-width: 480px) {
-    .couple-names {
+    /* Hero Section Extra Small Mobile */
+    .hero-section {
+        padding: 0.5rem;
+    }
+    
+    .main-heading {
         font-size: 2.8rem;
     }
     
+    .couple-names {
+        font-size: 2.2rem;
+    }
+    
+    .ampersand {
+        font-size: 1.5rem;
+    }
+    
     .wedding-date-bg {
-        font-size: 4rem;
-        top: -80px;
+        font-size: 3rem;
+        top: -60px;
+    }
+    
+    .cta-button {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Reduce floating elements on very small screens */
+    .heart-4,
+    .heart-5,
+    .leaf-2,
+    .flower-2 {
+        display: none;
     }
     
     .section-title {

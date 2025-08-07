@@ -119,7 +119,6 @@ function initHeroScrollEffect() {
     const heroContent = document.querySelector('.hero-content');
     const backgroundImage = document.querySelector('.background-image');
     const weddingDateBg = document.querySelector('.wedding-date-bg');
-    const scrollIndicator = document.querySelector('.scroll-indicator');
     const backgroundOverlay = document.querySelector('.background-overlay');
     
     // Throttle scroll events for better performance
@@ -164,13 +163,14 @@ function initHeroScrollEffect() {
             weddingDateBg.style.transform = `translateX(-50%) translateY(${dateTranslateY}px) scale(${dateScale})`;
         }
         
-        // Scroll indicator fade out
-        if (scrollIndicator) {
-            const indicatorOpacity = 1 - (scrollProgress * 2);
-            const indicatorTranslateY = scrollProgress * 30;
+        // CTA button fade effect (optional)
+        const ctaButton = document.querySelector('.cta-button');
+        if (ctaButton && scrolled < windowHeight) {
+            const buttonOpacity = 1 - (scrollProgress * 1.5);
+            const buttonTranslateY = scrollProgress * 20;
             
-            scrollIndicator.style.opacity = Math.max(indicatorOpacity, 0);
-            scrollIndicator.style.transform = `translateX(-50%) translateY(${indicatorTranslateY}px)`;
+            ctaButton.style.opacity = Math.max(buttonOpacity, 0);
+            ctaButton.style.transform = `translateY(${buttonTranslateY}px)`;
         }
         
         // Add/remove scrolled class for additional CSS animations
@@ -178,12 +178,10 @@ function initHeroScrollEffect() {
             hero?.classList.add('scrolled');
             heroContent?.classList.add('scrolled');
             weddingDateBg?.classList.add('scrolled');
-            scrollIndicator?.classList.add('scrolled');
         } else {
             hero?.classList.remove('scrolled');
             heroContent?.classList.remove('scrolled');
             weddingDateBg?.classList.remove('scrolled');
-            scrollIndicator?.classList.remove('scrolled');
         }
         
         ticking = false;
@@ -241,13 +239,15 @@ function initSmoothScrolling() {
         });
     });
     
-    // Scroll indicator click
-    const scrollIndicator = document.querySelector('.scroll-indicator');
-    if (scrollIndicator) {
-        scrollIndicator.addEventListener('click', () => {
-            const loveStorySection = document.querySelector('.love-story-section');
-            if (loveStorySection) {
-                loveStorySection.scrollIntoView({
+    // CTA button smooth scroll
+    const ctaButton = document.querySelector('.cta-button');
+    if (ctaButton) {
+        ctaButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = ctaButton.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
                 });

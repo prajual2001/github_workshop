@@ -6,26 +6,70 @@
     <title>Riya & Prajwal - Wedding Invitation</title>
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Playfair+Display:wght@300;400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;600;700&family=Playfair+Display:wght@300;400;600;700&family=Cinzel:wght@400;500;600&family=Poppins:wght@300;400;500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     
     <!-- CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Hero Section -->
-    <section id="hero" class="hero-section">
+    <section id="hero" class="hero-section" aria-label="Wedding invitation hero section">
+        <!-- Decorative Floral Border -->
+        <div class="floral-border-top">
+            <div class="floral-pattern"></div>
+        </div>
+        
         <div class="hero-background">
-            <!-- Placeholder for couple's image -->
+            <!-- Romantic Background -->
             <div class="background-image"></div>
             <div class="background-overlay"></div>
+            
+            <!-- Floating Hearts -->
+            <div class="floating-hearts">
+                <span class="heart heart-1" aria-hidden="true">♥</span>
+                <span class="heart heart-2" aria-hidden="true">♥</span>
+                <span class="heart heart-3" aria-hidden="true">♥</span>
+                <span class="heart heart-4" aria-hidden="true">♥</span>
+                <span class="heart heart-5" aria-hidden="true">♥</span>
+            </div>
+            
+            <!-- Decorative Elements -->
+            <div class="decorative-elements">
+                <div class="leaf leaf-1" aria-hidden="true">🍃</div>
+                <div class="leaf leaf-2" aria-hidden="true">🍃</div>
+                <div class="flower flower-1" aria-hidden="true">🌸</div>
+                <div class="flower flower-2" aria-hidden="true">🌸</div>
+                <div class="rings" aria-hidden="true">💍</div>
+            </div>
         </div>
         
         <div class="hero-content">
-            <div class="wedding-date-bg">08.11.2025</div>
-            <h1 class="couple-names">Riya & Prajwal</h1>
-            <div class="scroll-indicator">
-                <div class="scroll-arrow"></div>
+            <!-- Wedding Date Background -->
+            <div class="wedding-date-bg" aria-hidden="true">08.11.2025</div>
+            
+            <!-- Main Content -->
+            <div class="invitation-text">
+                <h1 class="main-heading">You're Invited</h1>
+                <p class="sub-heading">To the Wedding of</p>
+                <h2 class="couple-names">
+                    <span class="name-riya">Riya</span>
+                    <span class="ampersand">&</span>
+                    <span class="name-prajwal">Prajwal</span>
+                </h2>
+                <p class="wedding-date">November 8th, 2025</p>
+                <p class="wedding-location">Rishikesh, Uttarakhand</p>
             </div>
+            
+            <!-- CTA Button -->
+            <a href="#love-story" class="cta-button" aria-label="Scroll to explore our love story">
+                <span>Explore Our Story</span>
+                <div class="button-decoration">✨</div>
+            </a>
+        </div>
+        
+        <!-- Decorative Floral Border Bottom -->
+        <div class="floral-border-bottom">
+            <div class="floral-pattern"></div>
         </div>
     </section>
 
